@@ -14,6 +14,7 @@ import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from .utils import get_config_path
@@ -92,10 +93,28 @@ def agent_browser_extra_notes() -> str:
     return (_config_manager_snapshot().get("agent_browser_notes") or "").strip()
 
 
+def _resolve_spawn_executable(name: str) -> str:
+    """Resolve *name* to something ``subprocess`` can execute on every OS.
+
+    npm's global bin dir ships an extensionless POSIX sh shim (``agent-browser``)
+    next to the Windows ``.cmd`` wrapper. POSIX spawns the shim via shebang, but
+    CreateProcess cannot execute it and does not apply PATHEXT, so on Windows
+    prefer the ``.cmd``/``.bat``/``.exe`` sibling resolved from PATH.
+    """
+    if os.name != "nt":
+        return name
+    for suffix in (".cmd", ".bat", ".exe"):
+        found = shutil.which(f"{name}{suffix}")
+        if found:
+            return found
+    return shutil.which(name) or name
+
+
 def _probe_help_argv(argv_without_help: list[str]) -> str | None:
+    argv = [_resolve_spawn_executable(argv_without_help[0]), *argv_without_help[1:]]
     try:
         proc = subprocess.run(
-            [*argv_without_help, "--help"],
+            [*argv, "--help"],
             capture_output=True,
             text=True,
             timeout=240,
@@ -223,7 +242,7 @@ def ensure_agent_browser_runtime() -> AgentBrowserSetup:
 
     try:
         proc = subprocess.run(
-            [npm, "install", "-g", "--yes", pkg],
+            [_resolve_spawn_executable(npm), "install", "-g", "--yes", pkg],
             capture_output=True,
             text=True,
             timeout=600,

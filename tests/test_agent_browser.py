@@ -43,7 +43,8 @@ def test_global_binary_short_circuits_npm():
     assert agent_browser.agent_browser_shell_invoker() == "agent-browser"
     run.assert_called_once()
     argv = run.call_args[0][0]
-    assert argv == ["agent-browser", "--help"]
+    assert argv[0].endswith("agent-browser")
+    assert argv[1:] == ["--help"]
 
 
 def test_global_help_failure():

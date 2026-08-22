@@ -1,0 +1,19 @@
+pyproject.toml
+  s_b23bae87a4d379::t_0cd8facbb74404 57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "085696b09b42728528196908449afe8c163e8b59",
+  "prompts": {},
+  "sessions": {
+    "s_b23bae87a4d379": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fd60c6d86ffeIgBCNda4tk7bUV",
+        "model": "unknown"
+      },
+      "human_author": "monet88 <minhthang421992@gmail.com>"
+    }
+  }
+}

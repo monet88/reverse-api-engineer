@@ -1,0 +1,24 @@
+PATCHES.md
+  h_17f2fa2b92da6a 1-57
+src/reverse_api/auto_engineer.py
+  h_17f2fa2b92da6a 34-56,86,101,198,200-202,339,354,388,390-393,590,605,696,698-701
+src/reverse_api/cli.py
+  h_17f2fa2b92da6a 2018,2110,2126,2143,2162
+src/reverse_api/cursor_engineer.py
+  h_17f2fa2b92da6a 16,492,508,526,528-531
+tests/test_auto_engineer.py
+  h_17f2fa2b92da6a 1377-1454
+tests/test_cursor_engineer.py
+  h_17f2fa2b92da6a 259-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "22ff4c744a57f2768c768215298a9f395111c8df",
+  "prompts": {},
+  "humans": {
+    "h_17f2fa2b92da6a": {
+      "author": "monet88 <minhthang421992@gmail.com>"
+    }
+  }
+}

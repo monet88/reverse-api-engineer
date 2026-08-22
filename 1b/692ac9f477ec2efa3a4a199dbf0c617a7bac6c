@@ -1,0 +1,25 @@
+src/reverse_api/engineer.py
+  s_b23bae87a4d379::t_fa84a3c10a8f10 280
+  s_b23bae87a4d379::t_1ff35e2f1694c3 5
+src/reverse_api/auto_engineer.py
+  s_b23bae87a4d379::t_6e2cee81c38052 232,244
+  s_b23bae87a4d379::t_2886af951a170e 9
+uv.lock
+  s_b23bae87a4d379::t_49ad4f5adbb7d6 1568,1607
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "1b692ac9f477ec2efa3a4a199dbf0c617a7bac6c",
+  "prompts": {},
+  "sessions": {
+    "s_b23bae87a4d379": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fd60c6d86ffeIgBCNda4tk7bUV",
+        "model": "unknown"
+      },
+      "human_author": "monet88 <minhthang421992@gmail.com>"
+    }
+  }
+}

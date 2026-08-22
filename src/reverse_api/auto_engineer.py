@@ -24,7 +24,7 @@ from .agent_browser import (
 )
 from .engineer import ClaudeEngineer
 from .opencode_engineer import OpenCodeEngineer, debug_log, format_error
-from .utils import build_sdk_env, get_har_dir
+from .utils import _build_playwright_mcp_args, build_sdk_env, get_har_dir
 
 # Suppress claude_agent_sdk logs
 logging.getLogger("claude_agent_sdk").setLevel(logging.WARNING)
@@ -60,6 +60,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
         # `headless` is auto-engineer specific: for MCP providers it configures the MCP
         # server's browser launch; for `agent-browser` it only adjusts prompt wording.
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         har_dir = get_har_dir(run_id, output_dir)
         har_path = har_dir / "recording.har"
 
@@ -74,6 +75,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
+        self.executable_path = executable_path
 
     def _build_auto_prompts(self) -> tuple[str, str]:
         """Build (system_prompt, user_message) for auto mode.
@@ -170,14 +172,11 @@ class ClaudeAutoEngineer(ClaudeEngineer):
                 "command": "npx",
                 "args": args,
             }
-        playwright_args = [
-            "rae-playwright-mcp@latest",
-            "run-mcp-server",
-            "--run-id",
+        playwright_args = _build_playwright_mcp_args(
             self.mcp_run_id,
-        ]
-        if self.headless:
-            playwright_args.append("--headless")
+            headless=self.headless,
+            executable_path=self.executable_path,
+        )
         return "playwright", {
             "type": "stdio",
             "command": "npx",
@@ -314,6 +313,7 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
     def __init__(self, run_id: str, prompt: str, output_dir: str | None = None, agent_provider: str = "auto", **kwargs):
         """Initialize OpenCode-backed agent engineer."""
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         har_dir = get_har_dir(run_id, output_dir)
         har_path = har_dir / "recording.har"
 
@@ -328,6 +328,7 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
         self.agent_provider = agent_provider
         self.mcp_name = None
         self.headless = headless
+        self.executable_path = executable_path
 
     def _get_active_prompts(self) -> tuple[str, str]:
         return ClaudeAutoEngineer._build_auto_prompts(self)
@@ -361,16 +362,12 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
                 },
             }
         self.mcp_name = f"playwright-{self._session_id}"
-        cmd = [
-            "npx",
-            "-y",
-            "rae-playwright-mcp@latest",
-            "run-mcp-server",
-            "--run-id",
+        cmd = _build_playwright_mcp_args(
             self.mcp_run_id,
-        ]
-        if self.headless:
-            cmd.append("--headless")
+            headless=self.headless,
+            executable_path=self.executable_path,
+            prefix=["npx", "-y"],
+        )
         return {
             "name": self.mcp_name,
             "config": {
@@ -567,6 +564,7 @@ class CopilotAutoEngineer:
         from .copilot_engineer import CopilotEngineer
 
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         har_dir = get_har_dir(run_id, output_dir)
         har_path = har_dir / "recording.har"
 
@@ -581,6 +579,7 @@ class CopilotAutoEngineer:
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
+        self.executable_path = executable_path
 
     def start_sync(self) -> None:
         self._engineer.start_sync()
@@ -671,15 +670,12 @@ class CopilotAutoEngineer:
             elif self.agent_provider == "agent-browser":
                 mcp_servers_payload = {}
             else:
-                pw_args = [
-                    "-y",
-                    "rae-playwright-mcp@latest",
-                    "run-mcp-server",
-                    "--run-id",
+                pw_args = _build_playwright_mcp_args(
                     self.mcp_run_id,
-                ]
-                if self.headless:
-                    pw_args.append("--headless")
+                    headless=self.headless,
+                    executable_path=self.executable_path,
+                    prefix=["-y"],
+                )
                 mcp_servers_payload = {
                     "playwright": {
                         "type": "local",

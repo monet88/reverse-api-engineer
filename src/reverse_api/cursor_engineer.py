@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from .agent_browser import ensure_agent_browser_runtime, print_agent_browser_setup_notices
+from .utils import _build_playwright_mcp_args
 from .base_engineer import BaseEngineer
 from .tui import ClaudeUI
 
@@ -488,6 +489,7 @@ class CursorAutoEngineer(CursorEngineer):
         **kwargs: Any,
     ):
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         from .utils import get_har_dir
 
         har_dir = get_har_dir(run_id, output_dir)
@@ -503,6 +505,7 @@ class CursorAutoEngineer(CursorEngineer):
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
+        self.executable_path = executable_path
 
     def _cursor_mcp_servers(self) -> dict[str, Any]:
         if self.agent_provider == "agent-browser":
@@ -520,15 +523,12 @@ class CursorAutoEngineer(CursorEngineer):
                     "args": args,
                 },
             }
-        playwright_args = [
-            "-y",
-            "rae-playwright-mcp@latest",
-            "run-mcp-server",
-            "--run-id",
+        playwright_args = _build_playwright_mcp_args(
             self.mcp_run_id,
-        ]
-        if self.headless:
-            playwright_args.append("--headless")
+            headless=self.headless,
+            executable_path=self.executable_path,
+            prefix=["-y"],
+        )
         return {
             "playwright": {
                 "type": "stdio",

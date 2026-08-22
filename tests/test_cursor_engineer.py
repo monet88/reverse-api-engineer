@@ -256,3 +256,42 @@ def test_cursor_reset_clears_started_calls(har_path: Path) -> None:
     eng._cursor_started_calls.add("stale-call-id")
     eng._cursor_reset_stream_buffers()
     assert eng._cursor_started_calls == set()
+
+
+def test_cursor_auto_engineer_executable_path(har_path: Path) -> None:
+    """CursorAutoEngineer pops executable_path and forwards it into MCP args."""
+    from reverse_api.cursor_engineer import CursorAutoEngineer
+
+    with patch("reverse_api.cursor_engineer._ensure_cursor_bridge_deps", return_value=None):
+        with patch("reverse_api.cursor_engineer.CursorStreamUI"):
+            with patch("reverse_api.utils.get_har_dir", return_value=har_path.parent):
+                eng = CursorAutoEngineer(
+                    run_id="r5",
+                    prompt="p",
+                    sdk="cursor",
+                    interactive=False,
+                    verbose=False,
+                    executable_path="C:/chrome.exe",
+                )
+    assert eng.executable_path == "C:/chrome.exe"
+    mcp = eng._cursor_mcp_servers()
+    assert "--executable-path" in mcp["playwright"]["args"]
+    assert "C:/chrome.exe" in mcp["playwright"]["args"]
+
+
+def test_cursor_auto_engineer_executable_path_default_none(har_path: Path) -> None:
+    from reverse_api.cursor_engineer import CursorAutoEngineer
+
+    with patch("reverse_api.cursor_engineer._ensure_cursor_bridge_deps", return_value=None):
+        with patch("reverse_api.cursor_engineer.CursorStreamUI"):
+            with patch("reverse_api.utils.get_har_dir", return_value=har_path.parent):
+                eng = CursorAutoEngineer(
+                    run_id="r6",
+                    prompt="p",
+                    sdk="cursor",
+                    interactive=False,
+                    verbose=False,
+                )
+    assert eng.executable_path is None
+    mcp = eng._cursor_mcp_servers()
+    assert "--executable-path" not in mcp["playwright"]["args"]

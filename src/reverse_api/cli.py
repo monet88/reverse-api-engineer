@@ -2015,6 +2015,7 @@ def run_auto_capture(
 ):
     """Auto mode: LLM-driven browser automation + real-time reverse engineering."""
     output_dir = output_dir or config_manager.get("output_dir")
+    executable_path = os.environ.get("RAE_EXECUTABLE_PATH") or config_manager.get("executable_path")
 
     if prompt is None:
         options = prompt_interactive_options(
@@ -2106,7 +2107,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
-                executable_path=config_manager.get("executable_path"),
+                executable_path=executable_path,
             )
         elif sdk == "copilot":
             from .auto_engineer import CopilotAutoEngineer
@@ -2122,7 +2123,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
-                executable_path=config_manager.get("executable_path"),
+                executable_path=executable_path,
             )
         elif sdk == "cursor":
             from .cursor_engineer import CursorAutoEngineer
@@ -2139,6 +2140,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
+                executable_path=executable_path,
                 cursor_model=model or config_manager.get("cursor_model", "composer-2.5"),
                 cursor_web_search=bool(config_manager.get("cursor_web_search", True)),
                 cursor_setting_sources=_cursor_src,
@@ -2157,7 +2159,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
-                executable_path=config_manager.get("executable_path"),
+                executable_path=executable_path,
             )
 
         if json_event_sink is not None:

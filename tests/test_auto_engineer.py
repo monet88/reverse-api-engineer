@@ -1374,3 +1374,81 @@ class TestOpenCodeAutoEngineerAnalyze:
 
             result = await eng.analyze_and_generate()
             assert result is None
+
+
+class TestExecutablePathWiring:
+    """executable_path plumbing: kwargs.pop, attribute, and MCP args."""
+
+    def _make_engineer(self, tmp_path, cls, **kwargs):
+        defaults = {
+            "run_id": "test123",
+            "prompt": "browse and capture",
+            "output_dir": str(tmp_path),
+        }
+        if cls is ClaudeAutoEngineer:
+            defaults["model"] = "claude-sonnet-4-6"
+        else:
+            defaults["opencode_provider"] = "anthropic"
+            defaults["opencode_model"] = "claude-opus-4-6"
+        defaults.update(kwargs)
+        with patch("reverse_api.auto_engineer.get_har_dir", return_value=tmp_path / "har"):
+            with patch("reverse_api.base_engineer.get_scripts_dir", return_value=tmp_path / "scripts"):
+                with patch("reverse_api.base_engineer.MessageStore"):
+                    if cls is OpenCodeAutoEngineer:
+                        with patch("reverse_api.opencode_engineer.OpenCodeUI"):
+                            return cls(**defaults)
+                    return cls(**defaults)
+
+    def test_kwargs_pop_no_leak_to_base_init(self, tmp_path):
+        """executable_path must be popped, not leaked into BaseEngineer's fixed signature."""
+        for cls in (ClaudeAutoEngineer, OpenCodeAutoEngineer):
+            eng = self._make_engineer(tmp_path, cls, executable_path="C:/chrome.exe")
+            assert eng.executable_path == "C:/chrome.exe"
+
+    def test_absent_defaults_to_none(self, tmp_path):
+        for cls in (ClaudeAutoEngineer, OpenCodeAutoEngineer):
+            eng = self._make_engineer(tmp_path, cls)
+            assert eng.executable_path is None
+
+    def test_claude_mcp_config_includes_executable_path(self, tmp_path):
+        eng = self._make_engineer(tmp_path, ClaudeAutoEngineer, executable_path="C:/chrome.exe")
+        name, config = eng._get_mcp_config()
+        assert name == "playwright"
+        assert "--executable-path" in config["args"]
+        assert "C:/chrome.exe" in config["args"]
+
+    def test_claude_mcp_config_omits_when_unset(self, tmp_path):
+        eng = self._make_engineer(tmp_path, ClaudeAutoEngineer)
+        _name, config = eng._get_mcp_config()
+        assert "--executable-path" not in config["args"]
+
+    def test_opencode_mcp_config_includes_executable_path(self, tmp_path):
+        eng = self._make_engineer(
+            tmp_path, OpenCodeAutoEngineer, executable_path="C:/chrome.exe", agent_provider="auto"
+        )
+        eng._session_id = "sess_test"
+        config = eng._get_opencode_mcp_config()
+        assert "--executable-path" in config["config"]["command"]
+        assert "C:/chrome.exe" in config["config"]["command"]
+
+    def test_helper_prefix_variants(self):
+        from reverse_api.auto_engineer import _build_playwright_mcp_args
+
+        assert _build_playwright_mcp_args("r1", headless=True, executable_path=None) == [
+            "rae-playwright-mcp@latest",
+            "run-mcp-server",
+            "--run-id",
+            "r1",
+            "--headless",
+        ]
+        assert _build_playwright_mcp_args(
+            "r1", headless=False, executable_path="C:/c.exe", prefix=["-y"]
+        ) == [
+            "-y",
+            "rae-playwright-mcp@latest",
+            "run-mcp-server",
+            "--run-id",
+            "r1",
+            "--executable-path",
+            "C:/c.exe",
+        ]

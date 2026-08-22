@@ -31,6 +31,29 @@ logging.getLogger("claude_agent_sdk").setLevel(logging.WARNING)
 logging.getLogger("claude_agent_sdk._internal.transport.subprocess_cli").setLevel(logging.WARNING)
 
 
+def _build_playwright_mcp_args(
+    mcp_run_id: str,
+    *,
+    headless: bool,
+    executable_path: str | None,
+    prefix: list[str] | None = None,
+) -> list[str]:
+    """Build rae-playwright-mcp args shared by all auto-engineer providers.
+
+    ``prefix`` prepends e.g. ``["npx", "-y"]`` (OpenCode, where the full command
+    lives in ``command``) or ``["-y"]`` (Copilot/Cursor, where ``command`` is
+    ``"npx"`` and only the flags go in ``args``).
+    """
+    args = ["rae-playwright-mcp@latest", "run-mcp-server", "--run-id", mcp_run_id]
+    if prefix:
+        args = [*prefix, *args]
+    if headless:
+        args.append("--headless")
+    if executable_path:
+        args += ["--executable-path", executable_path]
+    return args
+
+
 def _agent_browser_prompt_context(engineer: Any) -> tuple[str, bool]:
     """Resolve run id + headless for agent-browser prompts without fragile getattr defaults."""
 
@@ -60,6 +83,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
         # `headless` is auto-engineer specific: for MCP providers it configures the MCP
         # server's browser launch; for `agent-browser` it only adjusts prompt wording.
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         har_dir = get_har_dir(run_id, output_dir)
         har_path = har_dir / "recording.har"
 
@@ -74,7 +98,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
-        self.executable_path = kwargs.get("executable_path")
+        self.executable_path = executable_path
 
     def _build_auto_prompts(self) -> tuple[str, str]:
         """Build (system_prompt, user_message) for auto mode.
@@ -171,17 +195,11 @@ class ClaudeAutoEngineer(ClaudeEngineer):
                 "command": "npx",
                 "args": args,
             }
-        playwright_args = [
-            "rae-playwright-mcp@latest",
-            "run-mcp-server",
-            "--run-id",
+        playwright_args = _build_playwright_mcp_args(
             self.mcp_run_id,
-        ]
-        if self.headless:
-            playwright_args.append("--headless")
-        rae_executable_path = getattr(self, "executable_path", None)
-        if rae_executable_path:
-            playwright_args += ["--executable-path", rae_executable_path]
+            headless=self.headless,
+            executable_path=self.executable_path,
+        )
         return "playwright", {
             "type": "stdio",
             "command": "npx",
@@ -318,6 +336,7 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
     def __init__(self, run_id: str, prompt: str, output_dir: str | None = None, agent_provider: str = "auto", **kwargs):
         """Initialize OpenCode-backed agent engineer."""
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         har_dir = get_har_dir(run_id, output_dir)
         har_path = har_dir / "recording.har"
 
@@ -332,7 +351,7 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
         self.agent_provider = agent_provider
         self.mcp_name = None
         self.headless = headless
-        self.executable_path = kwargs.get("executable_path")
+        self.executable_path = executable_path
 
     def _get_active_prompts(self) -> tuple[str, str]:
         return ClaudeAutoEngineer._build_auto_prompts(self)
@@ -366,19 +385,12 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
                 },
             }
         self.mcp_name = f"playwright-{self._session_id}"
-        cmd = [
-            "npx",
-            "-y",
-            "rae-playwright-mcp@latest",
-            "run-mcp-server",
-            "--run-id",
+        cmd = _build_playwright_mcp_args(
             self.mcp_run_id,
-        ]
-        if self.headless:
-            cmd.append("--headless")
-        rae_executable_path = getattr(self, "executable_path", None)
-        if rae_executable_path:
-            cmd += ["--executable-path", rae_executable_path]
+            headless=self.headless,
+            executable_path=self.executable_path,
+            prefix=["npx", "-y"],
+        )
         return {
             "name": self.mcp_name,
             "config": {
@@ -575,6 +587,7 @@ class CopilotAutoEngineer:
         from .copilot_engineer import CopilotEngineer
 
         headless = kwargs.pop("headless", False)
+        executable_path = kwargs.pop("executable_path", None)
         har_dir = get_har_dir(run_id, output_dir)
         har_path = har_dir / "recording.har"
 
@@ -589,7 +602,7 @@ class CopilotAutoEngineer:
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
-        self.executable_path = kwargs.get("executable_path")
+        self.executable_path = executable_path
 
     def start_sync(self) -> None:
         self._engineer.start_sync()
@@ -680,18 +693,12 @@ class CopilotAutoEngineer:
             elif self.agent_provider == "agent-browser":
                 mcp_servers_payload = {}
             else:
-                pw_args = [
-                    "-y",
-                    "rae-playwright-mcp@latest",
-                    "run-mcp-server",
-                    "--run-id",
+                pw_args = _build_playwright_mcp_args(
                     self.mcp_run_id,
-                ]
-                if self.headless:
-                    pw_args.append("--headless")
-                rae_executable_path = getattr(self, "executable_path", None)
-                if rae_executable_path:
-                    pw_args += ["--executable-path", rae_executable_path]
+                    headless=self.headless,
+                    executable_path=self.executable_path,
+                    prefix=["-y"],
+                )
                 mcp_servers_payload = {
                     "playwright": {
                         "type": "local",

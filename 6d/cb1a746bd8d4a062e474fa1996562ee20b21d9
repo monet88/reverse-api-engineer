@@ -1,0 +1,28 @@
+src/reverse_api/cursor_engineer.py
+  s_16371eeaa6b8b4::t_2505ed73cdcee9 16
+tests/test_cursor_engineer.py
+  s_16371eeaa6b8b4::t_23249423dce499 287
+  s_16371eeaa6b8b4::t_4999d8ae3ac90d 267
+tests/test_auto_engineer.py
+  s_16371eeaa6b8b4::t_624bb1bd472d4b 1435
+src/reverse_api/auto_engineer.py
+  s_16371eeaa6b8b4::t_374e4fd98f7a32 27
+src/reverse_api/utils.py
+  s_16371eeaa6b8b4::t_6f72ab55483376 835-851
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "6dcb1a746bd8d4a062e474fa1996562ee20b21d9",
+  "prompts": {},
+  "sessions": {
+    "s_16371eeaa6b8b4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fd6a67e5bffe0f47gqfLw6W4DK",
+        "model": "unknown"
+      },
+      "human_author": "monet88 <minhthang421992@gmail.com>"
+    }
+  }
+}

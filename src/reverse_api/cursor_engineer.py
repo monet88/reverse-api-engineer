@@ -503,6 +503,7 @@ class CursorAutoEngineer(CursorEngineer):
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
+        self.executable_path = kwargs.get("executable_path")
 
     def _cursor_mcp_servers(self) -> dict[str, Any]:
         if self.agent_provider == "agent-browser":
@@ -529,6 +530,9 @@ class CursorAutoEngineer(CursorEngineer):
         ]
         if self.headless:
             playwright_args.append("--headless")
+        rae_executable_path = getattr(self, "executable_path", None)
+        if rae_executable_path:
+            playwright_args += ["--executable-path", rae_executable_path]
         return {
             "playwright": {
                 "type": "stdio",

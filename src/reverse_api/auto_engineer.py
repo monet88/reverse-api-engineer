@@ -74,6 +74,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
+        self.executable_path = kwargs.get("executable_path")
 
     def _build_auto_prompts(self) -> tuple[str, str]:
         """Build (system_prompt, user_message) for auto mode.
@@ -178,6 +179,9 @@ class ClaudeAutoEngineer(ClaudeEngineer):
         ]
         if self.headless:
             playwright_args.append("--headless")
+        rae_executable_path = getattr(self, "executable_path", None)
+        if rae_executable_path:
+            playwright_args += ["--executable-path", rae_executable_path]
         return "playwright", {
             "type": "stdio",
             "command": "npx",
@@ -328,6 +332,7 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
         self.agent_provider = agent_provider
         self.mcp_name = None
         self.headless = headless
+        self.executable_path = kwargs.get("executable_path")
 
     def _get_active_prompts(self) -> tuple[str, str]:
         return ClaudeAutoEngineer._build_auto_prompts(self)
@@ -371,6 +376,9 @@ class OpenCodeAutoEngineer(OpenCodeEngineer):
         ]
         if self.headless:
             cmd.append("--headless")
+        rae_executable_path = getattr(self, "executable_path", None)
+        if rae_executable_path:
+            cmd += ["--executable-path", rae_executable_path]
         return {
             "name": self.mcp_name,
             "config": {
@@ -581,6 +589,7 @@ class CopilotAutoEngineer:
         self.mcp_run_id = run_id
         self.agent_provider = agent_provider
         self.headless = headless
+        self.executable_path = kwargs.get("executable_path")
 
     def start_sync(self) -> None:
         self._engineer.start_sync()
@@ -680,6 +689,9 @@ class CopilotAutoEngineer:
                 ]
                 if self.headless:
                     pw_args.append("--headless")
+                rae_executable_path = getattr(self, "executable_path", None)
+                if rae_executable_path:
+                    pw_args += ["--executable-path", rae_executable_path]
                 mcp_servers_payload = {
                     "playwright": {
                         "type": "local",

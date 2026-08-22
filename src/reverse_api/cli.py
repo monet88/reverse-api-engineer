@@ -2106,6 +2106,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
+                executable_path=config_manager.get("executable_path"),
             )
         elif sdk == "copilot":
             from .auto_engineer import CopilotAutoEngineer
@@ -2121,6 +2122,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
+                executable_path=config_manager.get("executable_path"),
             )
         elif sdk == "cursor":
             from .cursor_engineer import CursorAutoEngineer
@@ -2155,6 +2157,7 @@ def run_auto_capture(
                 output_language=output_language,
                 interactive=interactive,
                 headless=headless,
+                executable_path=config_manager.get("executable_path"),
             )
 
         if json_event_sink is not None:

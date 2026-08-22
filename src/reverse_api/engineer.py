@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -276,7 +277,7 @@ class ClaudeEngineer(BaseEngineer):
             system_prompt=system_prompt,
             permission_mode="acceptEdits",
             can_use_tool=self._handle_tool_permission,
-            cwd=str(self.scripts_dir.parent.parent),
+            cwd=os.getcwd(),
             model=self.model,
             env=build_sdk_env(),
             stderr=self._handle_cli_stderr,

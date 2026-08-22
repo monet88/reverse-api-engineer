@@ -6,6 +6,7 @@ Providers **auto** and **chrome-mcp** attach a browser MCP server to the SDK. Pr
 
 import asyncio
 import logging
+import os
 from typing import Any
 
 import httpx
@@ -228,7 +229,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
                 ],
                 permission_mode="bypassPermissions",
                 can_use_tool=self._handle_tool_permission,
-                cwd=str(self.scripts_dir.parent.parent),
+                cwd=os.getcwd(),
                 model=self.model,
                 env=build_sdk_env(),
                 stderr=self._handle_cli_stderr,
@@ -240,7 +241,7 @@ class ClaudeAutoEngineer(ClaudeEngineer):
                 mcp_servers={mcp_name: mcp_config, "verification": verification_server},
                 permission_mode="bypassPermissions",
                 can_use_tool=self._handle_tool_permission,
-                cwd=str(self.scripts_dir.parent.parent),
+                cwd=os.getcwd(),
                 model=self.model,
                 env=build_sdk_env(),
                 stderr=self._handle_cli_stderr,

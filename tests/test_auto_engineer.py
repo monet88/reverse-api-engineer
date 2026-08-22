@@ -1432,7 +1432,7 @@ class TestExecutablePathWiring:
         assert "C:/chrome.exe" in config["config"]["command"]
 
     def test_helper_prefix_variants(self):
-        from reverse_api.auto_engineer import _build_playwright_mcp_args
+        from reverse_api.utils import _build_playwright_mcp_args
 
         assert _build_playwright_mcp_args("r1", headless=True, executable_path=None) == [
             "rae-playwright-mcp@latest",

@@ -24,34 +24,11 @@ from .agent_browser import (
 )
 from .engineer import ClaudeEngineer
 from .opencode_engineer import OpenCodeEngineer, debug_log, format_error
-from .utils import build_sdk_env, get_har_dir
+from .utils import _build_playwright_mcp_args, build_sdk_env, get_har_dir
 
 # Suppress claude_agent_sdk logs
 logging.getLogger("claude_agent_sdk").setLevel(logging.WARNING)
 logging.getLogger("claude_agent_sdk._internal.transport.subprocess_cli").setLevel(logging.WARNING)
-
-
-def _build_playwright_mcp_args(
-    mcp_run_id: str,
-    *,
-    headless: bool,
-    executable_path: str | None,
-    prefix: list[str] | None = None,
-) -> list[str]:
-    """Build rae-playwright-mcp args shared by all auto-engineer providers.
-
-    ``prefix`` prepends e.g. ``["npx", "-y"]`` (OpenCode, where the full command
-    lives in ``command``) or ``["-y"]`` (Copilot/Cursor, where ``command`` is
-    ``"npx"`` and only the flags go in ``args``).
-    """
-    args = ["rae-playwright-mcp@latest", "run-mcp-server", "--run-id", mcp_run_id]
-    if prefix:
-        args = [*prefix, *args]
-    if headless:
-        args.append("--headless")
-    if executable_path:
-        args += ["--executable-path", executable_path]
-    return args
 
 
 def _agent_browser_prompt_context(engineer: Any) -> tuple[str, bool]:

@@ -832,6 +832,23 @@ def build_script_commands(script: Path, script_args: tuple[str, ...] = ()) -> tu
     raise ValueError(f"unsupported script type: {script.name}")
 
 
+def _build_playwright_mcp_args(
+    mcp_run_id: str,
+    *,
+    headless: bool,
+    executable_path: str | None,
+    prefix: list[str] | None = None,
+) -> list[str]:
+    args = ["rae-playwright-mcp@latest", "run-mcp-server", "--run-id", mcp_run_id]
+    if prefix:
+        args = [*prefix, *args]
+    if headless:
+        args.append("--headless")
+    if executable_path:
+        args += ["--executable-path", executable_path]
+    return args
+
+
 def extract_domain_from_har(har_path: Path) -> str | None:
     """Extract the primary domain from a HAR file.
 

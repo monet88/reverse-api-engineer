@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from .agent_browser import ensure_agent_browser_runtime, print_agent_browser_setup_notices
-from .auto_engineer import _build_playwright_mcp_args
+from .utils import _build_playwright_mcp_args
 from .base_engineer import BaseEngineer
 from .tui import ClaudeUI
 

@@ -264,7 +264,7 @@ def test_cursor_auto_engineer_executable_path(har_path: Path) -> None:
 
     with patch("reverse_api.cursor_engineer._ensure_cursor_bridge_deps", return_value=None):
         with patch("reverse_api.cursor_engineer.CursorStreamUI"):
-            with patch("reverse_api.auto_engineer.get_har_dir", return_value=har_path.parent):
+            with patch("reverse_api.utils.get_har_dir", return_value=har_path.parent):
                 eng = CursorAutoEngineer(
                     run_id="r5",
                     prompt="p",
@@ -284,7 +284,7 @@ def test_cursor_auto_engineer_executable_path_default_none(har_path: Path) -> No
 
     with patch("reverse_api.cursor_engineer._ensure_cursor_bridge_deps", return_value=None):
         with patch("reverse_api.cursor_engineer.CursorStreamUI"):
-            with patch("reverse_api.auto_engineer.get_har_dir", return_value=har_path.parent):
+            with patch("reverse_api.utils.get_har_dir", return_value=har_path.parent):
                 eng = CursorAutoEngineer(
                     run_id="r6",
                     prompt="p",

@@ -1,0 +1,23 @@
+src/reverse_api/agent_browser.py
+  s_b23bae87a4d379::t_028b3d56c29d3a 17
+  s_b23bae87a4d379::t_c3b46ad290142c 96-112,114,117
+  s_b23bae87a4d379::t_84cec08c079de6 245
+tests/test_agent_browser.py
+  s_b23bae87a4d379::t_17cdf8c30288ca 46-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "566b357b4f272f731e7cc927f41000916fa96c58",
+  "prompts": {},
+  "sessions": {
+    "s_b23bae87a4d379": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fd60c6d86ffeIgBCNda4tk7bUV",
+        "model": "unknown"
+      },
+      "human_author": "monet88 <minhthang421992@gmail.com>"
+    }
+  }
+}
